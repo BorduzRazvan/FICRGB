@@ -1,10 +1,16 @@
 # FICRGB
 <-------------------- Project ------------------------->
 <--- Compile --->
+
 Link: http://docs.opencv.org/2.4/doc/tutorials/introduction/linux_gcc_cmake/linux_gcc_cmake.html
 
 <--- Clone ---> 
+
 git clone [http://ownrepo]
+
+<---- Stream link ---> 
+
+rtmp://172.16.254.63/live/live
 
 <-------------------- Laborator ------------------------->
 Informatii laborator FIC:
@@ -14,7 +20,7 @@ Site: g.iovanalex.ro
 Tool: Mobaxtrem Personal 9.3
 
 Ip's:
-172.16.254.246, 89, 42, 198, 53, 59, 117, 206, 199, 159, 88, 63.
+172.16.254.246, 89, 42, 198, 53, 59, 117, 206, 199, 159, 88.
 
 Username: cloud
 Password: cloud123
