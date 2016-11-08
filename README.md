@@ -19,14 +19,19 @@ Password: cloud123
 
 1.
 Install medit: sudo apt-get install mc
+
 2.
 Compilare sa vedem codul in assembler: gcc -S nume.c -> nume.s
+
 3.
 mcedit nume.s
+
 4.
 Compilare fara sa leg binarul de executabil: gcc -c -o 1.o 1.c
+
 5.
 Deasamblare ( decompilare ): objdump -d 1.o ( -d disassamble )
+
 6.
 (Optimize first level - easy )
 gcc -O1 -S 1.c
