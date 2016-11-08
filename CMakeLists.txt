@@ -1,0 +1,5 @@
+cmake_minimum_required(VERSION 2.8)
+project( DisplayImage_RGB )
+find_package( OpenCV REQUIRED )
+add_executable( DisplayImage_RGB video.cpp )
+target_link_libraries( DisplayImage_RGB ${OpenCV_LIBS} )
