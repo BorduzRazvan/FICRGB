@@ -197,7 +197,7 @@ int main(int argc, char* argv[])
 	//video capture object to acquire webcam feed
 	VideoCapture capture;
 	//open capture object at location zero (default location for webcam)
-	capture.open(0);
+	capture.open("rtmp://172.16.254.63/live/live");
 	//set height and width of capture frame
 	capture.set(CV_CAP_PROP_FRAME_WIDTH, FRAME_WIDTH);
 	capture.set(CV_CAP_PROP_FRAME_HEIGHT, FRAME_HEIGHT);
@@ -230,7 +230,7 @@ int main(int argc, char* argv[])
 		//show frames
 		imshow(windowName2, threshold);
 		imshow(windowName, cameraFeed);
-		imshow(windowName1, HSV);
+		//imshow(windowName1, HSV);
 		setMouseCallback("Original Image", on_mouse, &p);
 		//delay 30ms so that screen can refresh.
 		//image will not appear without this waitKey() command
