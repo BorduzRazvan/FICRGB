@@ -216,7 +216,7 @@ int main(int argc, char* argv[])
         return -1;
     }
     
-   strcpy(buffer,"f\n");
+   strcpy(buffer,"f\ns\nf\ns\nl\ns\n");
    
    if(n=write(sockfd,buffer,BUFSIZE) < 0)
    {
@@ -224,20 +224,11 @@ int main(int argc, char* argv[])
    return -1;
    }
    
-   memset(buffer, 0, BUFSIZE);
-   
-   strcpy(buffer,"s\n");
- 
-   if(n=write(sockfd,buffer,BUFSIZE) < 0)
-   {
-   perror("ERROR");
-   return -1;
-   }
    
    
    memset(buffer, 0, BUFSIZE);
    
-   strcpy(buffer,"r\n");
+   strcpy(buffer,"b\n");
  
    if(n=write(sockfd,buffer,BUFSIZE) < 0)
    {
@@ -245,15 +236,6 @@ int main(int argc, char* argv[])
    return -1;
    }
    
-      memset(buffer, 0, BUFSIZE);
-   
-   strcpy(buffer,"s\n");
- 
-   if(n=write(sockfd,buffer,BUFSIZE) < 0)
-   {
-   perror("ERROR");
-   return -1;
-   }
    
    
 	//some boolean variables for different functionality within this
