@@ -43,3 +43,10 @@ Deasamblare ( decompilare ): objdump -d 1.o ( -d disassamble )
 6.
 (Optimize first level - easy )
 gcc -O1 -S 1.c
+
+
+<---- telnet 193.226.12.217 20231
+comenzi: f - forward, s - stop, l- left, r- right, b - backwards  
+
+<--- Conectare robotel ---> 
+1. Conectare din aplicatie la robotel. 
