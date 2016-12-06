@@ -6,6 +6,19 @@
 //#include <opencv2\cv.h>
 #include "opencv2/opencv.hpp"
 
+
+#include <cstdio>
+#include <cstring>
+#include <unistd.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <arpa/inet.h>
+
+
+#define HOST_IP "193.226.12.217" // that should do for now
+#define PORTNUM 20231          // daytime
+#define BUFSIZE 64
+
 using namespace std;
 using namespace cv;
 //initial min and max HSV filter values.
@@ -28,6 +41,7 @@ const int MAX_OBJECT_AREA = FRAME_HEIGHT*FRAME_WIDTH / 1.5;
 const std::string windowName = "Original Image";
 const std::string windowName1 = "HSV Image";
 const std::string windowName2 = "Thresholded Image";
+const std::string windowName22 = "Thresholded2 Image";
 const std::string windowName3 = "After Morphological Operations";
 const std::string trackbarWindowName = "Trackbars";
 
@@ -178,6 +192,45 @@ void trackFilteredObject(int &x, int &y, Mat threshold, Mat &cameraFeed) {
 int main(int argc, char* argv[])
 {
 
+
+ // Connect to the robot 
+     int sockfd, n;
+    struct sockaddr_in remote;
+    char buffer[BUFSIZE];
+    /* Clear out needed memory */
+    memset(buffer, 0, BUFSIZE);
+    memset(&remote, 0, sizeof(remote));
+    /* Fill in required details in the socket structure */
+    remote.sin_family = AF_INET;
+    remote.sin_port = htons(PORTNUM);
+    remote.sin_addr.s_addr = inet_addr(HOST_IP);
+    /* Create a socket */
+    sockfd = socket(AF_INET, SOCK_STREAM, 0);
+    if(sockfd < 0) {
+        perror("socket");
+        return -1;
+    }
+    /* Connect to remote host */
+    if(connect(sockfd, (struct sockaddr *) &remote, sizeof(remote)) < 0) {
+        perror("connect");
+        return -1;
+    }
+    
+    
+   strcpy(buffer,"f\n");
+   if(n=write(sockfd,buffer,BUFSIZE) < 0)
+   {
+   printf("ERROR");
+   exit(1);
+   }
+   waitKey(2000);
+   strcpy(buffer,"s\n");
+ 
+   if(n=write(sockfd,buffer,BUFSIZE) < 0)
+   {
+   perror("ERROR");
+   return -1;
+   }
 	//some boolean variables for different functionality within this
 	//program
 	bool trackObjects = true;
@@ -190,8 +243,10 @@ int main(int argc, char* argv[])
 	Mat HSV;
 	//matrix storage for binary threshold image
 	Mat threshold;
+  Mat threshold2;
 	//x and y values for the location of the object
-	int x = 0, y = 0;
+	int x1 = 0, y1 = 0;
+	int x2 = 0, y2 = 0;
 	//create slider bars for HSV filtering
 	createTrackbars();
 	//video capture object to acquire webcam feed
@@ -212,21 +267,35 @@ int main(int argc, char* argv[])
 
 		//store image to matrix
 		capture.read(cameraFeed);
+   if(cameraFeed.empty())
+   { 
+   return 1; 
+   } 
+  
 		//convert frame from BGR to HSV colorspace
 		cvtColor(cameraFeed, HSV, COLOR_BGR2HSV);
 		//filter HSV image between values and store filtered image to
-		//threshold matrix
-		inRange(HSV, Scalar(H_MIN, S_MIN, V_MIN), Scalar(H_MAX, S_MAX, V_MAX), threshold);
+		//threshold matrix - color 1 
+		inRange(HSV, Scalar(92,0, 130), Scalar(224, 256, 256), threshold);
+		//threshold matrix_2 - color 2 (MInS, MAXs)
+		inRange(HSV, Scalar(59, 27, 130), Scalar(69, 256, 256), threshold2);
 		//perform morphological operations on thresholded image to eliminate noise
 		//and emphasize the filtered object(s)
 		if (useMorphOps)
+   {
 			morphOps(threshold);
-		//pass in thresholded frame to our object tracking function
+      morphOps(threshold2);
+      
+   }
+    //pass in thresholded frame to our object tracking function
 		//this function will return the x and y coordinates of the
 		//filtered object
 		if (trackObjects)
-			trackFilteredObject(x, y, threshold, cameraFeed);
-
+   {
+			trackFilteredObject(x1, y1, threshold, cameraFeed);
+			trackFilteredObject(x2, y2, threshold2, cameraFeed);
+      
+   }
 		//show frames
 		imshow(windowName2, threshold);
 		imshow(windowName, cameraFeed);
