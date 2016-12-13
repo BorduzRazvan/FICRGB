@@ -16,7 +16,7 @@
 
 
 #define HOST_IP "193.226.12.217" // that should do for now
-#define PORTNUM 20231          // daytime
+#define PORTNUM 20232          // daytime
 #define BUFSIZE 64
 
 using namespace std;
@@ -44,6 +44,14 @@ const std::string windowName2 = "Thresholded Image";
 const std::string windowName22 = "Thresholded2 Image";
 const std::string windowName3 = "After Morphological Operations";
 const std::string trackbarWindowName = "Trackbars";
+
+
+typedef struct moves { 
+  char forward[2];
+  char back[2]; 
+  char left[2];
+  char right[2];
+} moves; 
 
 
 void on_mouse(int e, int x, int y, int d, void *ptr)
@@ -189,17 +197,87 @@ void trackFilteredObject(int &x, int &y, Mat threshold, Mat &cameraFeed) {
 		else putText(cameraFeed, "TOO MUCH NOISE! ADJUST FILTER", Point(0, 50), 1, 2, Scalar(0, 0, 255), 2);
 	}
 }
+
+void send_command(char *command, int to_sleep, int socket)
+{
+    /* Clear out needed memory */
+    char buffer[BUFSIZE];
+    memset(buffer, 0, BUFSIZE);
+    /* Build the command for robot */
+    strcpy(buffer,command);
+    strcat(buffer,"\n");
+     int n;
+   /* Send the command to robot */
+  if(n=write(socket,buffer,BUFSIZE) < 0)
+   {
+   perror("ERROR");
+   }
+   /* Wait until the next command */
+  sleep(to_sleep);
+}
+
+
+
+
 int main(int argc, char* argv[])
 {
 
-
+  if((argc != 3) || (strcmp(argv[1],argv[2])==0))
+  { 
+    return -1; 
+  }
+   
+  int player1_min[3]; 
+  int player1_max[3];
+  int player2_min[3];
+  int player2_max[3]; 
+  
+  switch(atoi(argv[1]))
+  { 
+    case 0: // blue 
+        player1_min={92,0,130}; 
+        player1_max={224,256,256};
+        break;
+    case 1: // red 
+        player1_min={0,136,204};
+        player1_max={92,239,256};
+        
+        break; 
+    case 2: 
+        player1_min={59,27,130};
+        player1_max={69,256,256};
+    
+        break; 
+    default : 
+      return -1;
+  }
+  
+  switch(atoi(argv[2]))
+  { 
+    case 0: // blue 
+        player2_min={92,0,130}; 
+        player2_max={224,256,256};
+        break;
+    case 1: // red 
+        player2_min={0,136,204};
+        player2_max={92,239,256};
+        
+        break; 
+    case 2: 
+        player2_min={59,27,130};
+        player2_max={69,256,256};
+        break; 
+    default : 
+        return -1;
+  }
+  
  // Connect to the robot 
      int sockfd, n;
     struct sockaddr_in remote;
-    char buffer[BUFSIZE];
     /* Clear out needed memory */
-    memset(buffer, 0, BUFSIZE);
+
     memset(&remote, 0, sizeof(remote));
+
     /* Fill in required details in the socket structure */
     remote.sin_family = AF_INET;
     remote.sin_port = htons(PORTNUM);
@@ -208,33 +286,14 @@ int main(int argc, char* argv[])
     sockfd = socket(AF_INET, SOCK_STREAM, 0);
     if(sockfd < 0) {
         perror("socket");
-        return -1;
+   //     return -1;
     }
     /* Connect to remote host */
     if(connect(sockfd, (struct sockaddr *) &remote, sizeof(remote)) < 0) {
         perror("connect");
-        return -1;
+   //     return -1;
     }
     
-   strcpy(buffer,"f\ns\nf\ns\nl\ns\n");
-   
-   if(n=write(sockfd,buffer,BUFSIZE) < 0)
-   {
-   perror("ERROR");
-   return -1;
-   }
-   
-   
-   
-   memset(buffer, 0, BUFSIZE);
-   
-   strcpy(buffer,"b\n");
- 
-   if(n=write(sockfd,buffer,BUFSIZE) < 0)
-   {
-   perror("ERROR");
-   return -1;
-   }
    
    
    
@@ -251,9 +310,11 @@ int main(int argc, char* argv[])
 	//matrix storage for binary threshold image
 	Mat threshold;
   Mat threshold2;
+  Mat threshold3; 
 	//x and y values for the location of the object
 	int x1 = 0, y1 = 0;
 	int x2 = 0, y2 = 0;
+  int x3 = 0, y3 = 0;
 	//create slider bars for HSV filtering
 	createTrackbars();
 	//video capture object to acquire webcam feed
@@ -282,16 +343,18 @@ int main(int argc, char* argv[])
 		//convert frame from BGR to HSV colorspace
 		cvtColor(cameraFeed, HSV, COLOR_BGR2HSV);
 		//filter HSV image between values and store filtered image to
-		//threshold matrix - color 1 
-		inRange(HSV, Scalar(92,0, 130), Scalar(224, 256, 256), threshold);
-		//threshold matrix_2 - color 2 (MInS, MAXs)
-		inRange(HSV, Scalar(59, 27, 130), Scalar(69, 256, 256), threshold2);
+		//threshold matrix - color 1 blue (224, 256, 256) 
+		inRange(HSV, Scalar(player1_min[0],player1_min[1], player1_min[2]), Scalar(player1_max[0], player1_max[1],player1_max[2]), threshold);
+		//threshold matrix_2 - color 2 (MInS, MAXs ) green
+	 	inRange(HSV, Scalar(player2_min[0],player2_min[1], player2_min[2]), Scalar(player2_max[0], player2_max[1],player2_max[2]), threshold2);
 		//perform morphological operations on thresholded image to eliminate noise
+    inRange(HSV, Scalar(200,300,400), Scalar(500,600,700), threshold3);
 		//and emphasize the filtered object(s)
 		if (useMorphOps)
    {
 			morphOps(threshold);
       morphOps(threshold2);
+      morphOps(threshold3);
       
    }
     //pass in thresholded frame to our object tracking function
@@ -299,8 +362,9 @@ int main(int argc, char* argv[])
 		//filtered object
 		if (trackObjects)
    {
-			trackFilteredObject(x1, y1, threshold, cameraFeed);
+			trackFilteredObject(x1, y1, threshold,  cameraFeed);
 			trackFilteredObject(x2, y2, threshold2, cameraFeed);
+      trackFilteredObject(x3, y3, threshold3, cameraFeed);
       
    }
 		//show frames
