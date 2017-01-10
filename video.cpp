@@ -16,7 +16,7 @@
 
 
 #define HOST_IP "193.226.12.217" // that should do for now
-#define PORTNUM 20232          // daytime
+#define PORTNUM 20231          // daytime
 #define BUFSIZE 64
 
 using namespace std;
@@ -227,26 +227,41 @@ int main(int argc, char* argv[])
     return -1; 
   }
    
-  int player1_min[3]; 
-  int player1_max[3];
-  int player2_min[3];
-  int player2_max[3]; 
+  int player1_min[3]={0,0,0}; 
+  int player1_max[3]={0,0,0};
+  int player2_min[3]={0,0,0};
+  int player2_max[3]={0,0,0}; 
   
   switch(atoi(argv[1]))
   { 
     case 0: // blue 
-        player1_min={92,0,130}; 
-        player1_max={224,256,256};
+        player1_min[0]=92;
+        player1_min[1]=0;
+        player1_min[2]=130; 
+        
+        player1_max[0]=224;
+        player1_max[1]=256;
+        player1_max[2]=256;
         break;
     case 1: // red 
-        player1_min={0,136,204};
-        player1_max={92,239,256};
+    
+        player1_min[0]=0;
+        player1_min[1]=136;
+        player1_min[2]=204; 
         
+        player1_max[0]=92;
+        player1_max[1]=239;
+        player1_max[2]=256;
         break; 
     case 2: 
-        player1_min={59,27,130};
-        player1_max={69,256,256};
     
+        player1_min[0]=59;
+        player1_min[1]=27;
+        player1_min[2]=130; 
+        
+        player1_max[0]=69;
+        player1_max[1]=256;
+        player1_max[2]=256;
         break; 
     default : 
       return -1;
@@ -255,17 +270,32 @@ int main(int argc, char* argv[])
   switch(atoi(argv[2]))
   { 
     case 0: // blue 
-        player2_min={92,0,130}; 
-        player2_max={224,256,256};
+    
+        player2_min[0]=92;
+        player2_min[1]=0;
+        player2_min[2]=130; 
+        
+        player2_max[0]=224;
+        player2_max[1]=256;
+        player2_max[2]=256;
         break;
     case 1: // red 
-        player2_min={0,136,204};
-        player2_max={92,239,256};
+        player2_min[0]=0;
+        player2_min[1]=136;
+        player2_min[2]=204; 
         
+        player2_max[0]=92;
+        player2_max[1]=239;
+        player2_max[2]=256;
         break; 
     case 2: 
-        player2_min={59,27,130};
-        player2_max={69,256,256};
+        player2_min[0]=59;
+        player2_min[1]=27;
+        player2_min[2]=130; 
+        
+        player2_max[0]=69;
+        player2_max[1]=256;
+        player2_max[2]=256;
         break; 
     default : 
         return -1;
@@ -294,9 +324,11 @@ int main(int argc, char* argv[])
    //     return -1;
     }
     
-   
-   
-   
+   send_command("f",1,sockfd);
+   send_command("s",1,sockfd);
+   send_command("b",1,sockfd);
+   send_command("s",1,sockfd);
+      
 	//some boolean variables for different functionality within this
 	//program
 	bool trackObjects = true;
@@ -314,7 +346,6 @@ int main(int argc, char* argv[])
 	//x and y values for the location of the object
 	int x1 = 0, y1 = 0;
 	int x2 = 0, y2 = 0;
-  int x3 = 0, y3 = 0;
 	//create slider bars for HSV filtering
 	createTrackbars();
 	//video capture object to acquire webcam feed
@@ -348,13 +379,11 @@ int main(int argc, char* argv[])
 		//threshold matrix_2 - color 2 (MInS, MAXs ) green
 	 	inRange(HSV, Scalar(player2_min[0],player2_min[1], player2_min[2]), Scalar(player2_max[0], player2_max[1],player2_max[2]), threshold2);
 		//perform morphological operations on thresholded image to eliminate noise
-    inRange(HSV, Scalar(200,300,400), Scalar(500,600,700), threshold3);
 		//and emphasize the filtered object(s)
 		if (useMorphOps)
    {
 			morphOps(threshold);
       morphOps(threshold2);
-      morphOps(threshold3);
       
    }
     //pass in thresholded frame to our object tracking function
@@ -364,8 +393,6 @@ int main(int argc, char* argv[])
    {
 			trackFilteredObject(x1, y1, threshold,  cameraFeed);
 			trackFilteredObject(x2, y2, threshold2, cameraFeed);
-      trackFilteredObject(x3, y3, threshold3, cameraFeed);
-      
    }
 		//show frames
 		imshow(windowName2, threshold);
