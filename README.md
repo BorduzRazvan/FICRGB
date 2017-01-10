@@ -50,3 +50,15 @@ comenzi: f - forward, s - stop, l- left, r- right, b - backwards
 
 <--- Conectare robotel ---> 
 1. Conectare din aplicatie la robotel. 
+
+2. Diametru 77 cm, raza 38.5 cm 
+   Diametru 560 pixeli, raza 280 pixeli
+   0.13 cm = 1 pixel
+   
+   Viteza liniara este de 33 cm/s 
+   Viteza liniara este de 254 pixeli/s 
+   Viteza liniara este de 1 pixel in 4 ms. 
+   
+   Distanta dintre doua puncte: sqrt( (y2-y1)*(y2-y1) + (x2-x1)*(x2-x1)) 
+   
+   
